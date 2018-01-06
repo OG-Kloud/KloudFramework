@@ -1,0 +1,6 @@
+version
+
+0.0.4-dev	
+			-Added passing events to Modules in an abstract fashion to allow custom handling without needing event handlers
+0.0.5-dev
+			- Added registration an integer based priority search for Economy plugin

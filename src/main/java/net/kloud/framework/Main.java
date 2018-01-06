@@ -18,17 +18,30 @@ import net.minecraftforge.fml.common.event.FMLServerStoppingEvent;
 @Mod(modid = Main.MODID, name = Main.NAME, version = Main.VERSION)
 public class Main {
 	
-	public static final String MODID = "kloudframework", NAME = "Kloud Framework", VERSION = "0.0.3-dev";
+	public static final String MODID = "kloudframework", NAME = "Kloud Framework", VERSION = "0.0.6-dev";
 	public static final boolean isDevMode = false, useDefaultEconomy = true, useDefaultPermissions = true, useDefaultRegion = true;
 	public static File saveDir;
 	public static IEconomyModule economy;
 	public static IPermissionModule permission;
 	public static List<IPermissionNode> permissionNodes = new ArrayList<IPermissionNode>();
-	
+	public static List<EconomyModuleEntry> economyModules = new ArrayList<EconomyModuleEntry>();
 	
 	
 	@Mod.Instance
 	public static Main instance;
+	
+	public void registerEconomyInstance(IEconomyModule module, int priority, String modid) {
+		economyModules.add(new EconomyModuleEntry(module, priority, modid));
+	}
+	
+	public void initiateModules(int pri) {
+		IEconomyModule econ = null;
+		for(EconomyModuleEntry entry : economyModules) {
+			if(entry.priority == pri) econ = entry.module;
+		}
+		if(econ == null) initiateModules(pri++);
+		if(econ == null) System.out.println("No economy plugin detected, will cause crash. Either no economy installed or not registered with the Framework");
+	}
 	
 	public void registerPermissionNode(IPermissionNode node) {
 		Main.permissionNodes.add(node);
@@ -39,11 +52,12 @@ public class Main {
 		saveDir = new File(e.getModConfigurationDirectory().getParentFile(), "KloudData");
 		saveDir.mkdirs();
 		
+		
 	}
 	
 	@EventHandler
 	public void init(FMLInitializationEvent e) {
-		
+		initiateModules(0);
 	}
 	
 	@EventHandler
